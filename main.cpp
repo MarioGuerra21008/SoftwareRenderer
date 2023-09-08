@@ -29,7 +29,7 @@ Color color1 = {255, 0, 0, 255};
 Color color2 = {0, 255, 0, 255};
 Color color3 = {0, 0, 255, 255};
 
-glm::vec3 light = glm::vec3(250.0f, 50.0f, 50.0f);
+glm::vec3 light = glm::vec3(0.0f, 0.0f, 0.0f);
 
 SDL_Window* window;
 Uniform uniform;
@@ -137,9 +137,9 @@ glm::mat4 createModelMatrix() {
 glm::mat4 createViewMatrix() {
     return glm::lookAt(
             // En donde se encuentra
-            glm::vec3(-15, 5, 10),
+            glm::vec3(0, 0, 2),
             // En donde está viendo
-            glm::vec3(0, 2, 0),
+            glm::vec3(0, 0, 0),
             // Hacia arriba para la cámara
             glm::vec3(0, 1, 0)
     );
@@ -241,7 +241,7 @@ int main(int argc, char* args[]) {
     glm::vec3 rotationAngles(0.0f, 0.0f, 0.0f); // Ángulos de rotación en los ejes X, Y y Z (en grados)
     glm::vec3 scale(1.0f, 1.0f, 1.0f);
 
-    glm::vec3 cameraPosition(0.0f, 0.0f, 3.0f); // Mueve la cámara hacia atrás
+    glm::vec3 cameraPosition(0.0f, 0.0f, 0.0f); // Mueve la cámara hacia atrás
     glm::vec3 targetPosition(0.0f, 0.0f, 0.0f);   // Coloca el centro de la escena en el origen
     glm::vec3 upVector(0.0f, 1.0f, 0.0f);
 
@@ -259,7 +259,7 @@ int main(int argc, char* args[]) {
     std::vector<glm::vec3> normal;
     std::vector<Face> faces;
 
-    bool success = loadOBJ("../models/Lab3.obj", vertices, normal, faces);
+    bool success = loadOBJ("../models/sphere.obj", vertices, normal, faces);
     if (!success) {
         // Manejo del error si la carga del archivo falla
         return 1;
