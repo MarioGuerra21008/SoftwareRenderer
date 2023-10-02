@@ -10,6 +10,7 @@ link_directories(${SDL2_LIB_DIR})
 include_directories("C:/MinGW/include")
 
 add_executable(SoftwareRenderer main.cpp extensions/color.h extensions/framebuffer.h extensions/point.h
-        extensions/line.h extensions/triangle.h extensions/fragment.h extensions/uniform.h extensions/shaders.h extensions/vertexArray.h extensions/loadOBJFile.h)
+        extensions/line.h extensions/triangle.h extensions/fragment.h extensions/uniform.h extensions/shaders.h
+        extensions/vertexArray.h extensions/loadOBJFile.h extensions/FastNoiseLite.h)
 
 target_link_libraries(SoftwareRenderer SDL2main SDL2)

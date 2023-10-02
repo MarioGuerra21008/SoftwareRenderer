@@ -18,9 +18,10 @@
 #include "extensions/shaders.h"
 #include "extensions/vertexArray.h"
 #include "extensions/loadOBJFile.h"
+#include "extensions/FastNoiseLite.h"
 
-const int WINDOW_WIDTH = 640;
-const int WINDOW_HEIGHT = 480;
+const int WINDOW_WIDTH = 1080;
+const int WINDOW_HEIGHT = 720;
 float pi = 3.14f / 3.0f;
 
 Color colorClear = {0, 0, 0, 255};
@@ -157,9 +158,9 @@ glm::mat4 createProjectionMatrix() {
 glm::mat4 createViewportMatrix() {
     glm::mat4 viewport = glm::mat4(1.0f);
     // Scale
-    viewport = glm::scale(viewport, glm::vec3(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f, 0.5f));
+    viewport = glm::scale(viewport, glm::vec3(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 1.5f, 1.0f));
     // Translate
-    viewport = glm::translate(viewport, glm::vec3(1.0f, 1.0f, 0.5f));
+    viewport = glm::translate(viewport, glm::vec3(1.0f, 0.75f, 1.0f));
 
     return viewport;
 }
@@ -170,9 +171,6 @@ void render(const std::vector<Vertex>& vertexArray,  const Uniform& uniform) {
         auto transformedVertex = vertexShader(vertex, uniform);
         transformedVertexArray.push_back(transformedVertex);
     }
-
-    // Clear z-buffer at the beginning of each frame
-    std::fill(zBuffer.begin(), zBuffer.end(), std::numeric_limits<double>::max());
 
     for (size_t i = 0; i < transformedVertexArray.size(); i += 3) {
         const Vertex& a = transformedVertexArray[i];
@@ -197,35 +195,36 @@ void render(const std::vector<Vertex>& vertexArray,  const Uniform& uniform) {
                     glm::vec3 barycentricCoord = calculateBarycentricCoord(A, B, C, pixelPosition);
 
                     if (isBarycentricCoord(barycentricCoord)) {
-                        Color barycentricColor {144,8,155};
-                        Color interpolatedColor = interpolateColor(barycentricCoord, barycentricColor, barycentricColor, barycentricColor);
+                        Color modelColor {0, 0, 0};
+                        Color interpolatedColor = interpolateColor(barycentricCoord, modelColor, modelColor, modelColor);
 
                         float depth = barycentricCoord.x * A.z + barycentricCoord.y * B.z + barycentricCoord.z * C.z;
 
                         glm::vec3 normal = a.normal * barycentricCoord.x + b.normal * barycentricCoord.y+ c.normal * barycentricCoord.z;
 
                         float fragmentIntensity = glm::dot(normal, glm::vec3 (0.0f,0.0f,1.0f));
-                        if (fragmentIntensity<=0){
+                        if (fragmentIntensity <= 0){
                             continue;
                         }
+
                         // Apply fragment shader to calculate final color with shading
                         Color finalColor = interpolatedColor * fragmentIntensity;
-
+                        glm::vec3 original = a.original * barycentricCoord.x + b.original * barycentricCoord.y + c.original * barycentricCoord.z;
                         // Create a fragment with the position, interpolated attributes, and depth
                         Fragment fragment;
                         fragment.position = glm::ivec2(x, y);
                         fragment.color = finalColor;
                         fragment.z = depth;
+                        fragment.original = original;
+
                         int index = y * WINDOW_WIDTH + x;
                         if (depth < zBuffer[index]) {
                             // Apply fragment shader to calculate final color
-                            Color fragmentShaderf = fragmentShader(fragment);
-
+                            Color fragmentShaderf = fragmentShaderSun(fragment);
                             // Draw the fragment using SDL_SetRenderDrawColor and SDL_RenderDrawPoint
                             SDL_SetRenderDrawColor(renderer, fragmentShaderf.r, fragmentShaderf.g, fragmentShaderf.b, fragmentShaderf.a);
                             SDL_RenderDrawPoint(renderer, x, WINDOW_HEIGHT-y);
-
-                            // Update the z-buffer value for this pixel
+                            nextTime = 0.5f + 1.0f;
                             zBuffer[index] = depth;
                         }
                     }
@@ -261,7 +260,6 @@ int main(int argc, char* args[]) {
 
     bool success = loadOBJ("../models/sphere.obj", vertices, normal, faces);
     if (!success) {
-        // Manejo del error si la carga del archivo falla
         return 1;
     }
 
@@ -283,7 +281,6 @@ int main(int argc, char* args[]) {
         uniform.model = createModelMatrix();
         uniform.projection = createProjectionMatrix();
         uniform.viewport = createViewportMatrix();
-
 
         SDL_SetRenderDrawColor(renderer, colorClear.r, colorClear.g, colorClear.b, colorClear.a);
         SDL_RenderClear(renderer);
