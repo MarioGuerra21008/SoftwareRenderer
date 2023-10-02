@@ -158,9 +158,9 @@ glm::mat4 createProjectionMatrix() {
 glm::mat4 createViewportMatrix() {
     glm::mat4 viewport = glm::mat4(1.0f);
     // Scale
-    viewport = glm::scale(viewport, glm::vec3(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 1.5f, 1.0f));
+    viewport = glm::scale(viewport, glm::vec3(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f, 0.5f));
     // Translate
-    viewport = glm::translate(viewport, glm::vec3(1.0f, 0.75f, 1.0f));
+    viewport = glm::translate(viewport, glm::vec3(1.0f, 1.0f, 1.0f));
 
     return viewport;
 }
@@ -287,7 +287,7 @@ int main(int argc, char* args[]) {
 
         glm::vec4 transformedLight = glm::inverse(createModelMatrix()) * glm::vec4(light, 0.0f);
         glm::vec3 transformedLightDirection = glm::normalize(glm::vec3(transformedLight));
-
+        std::fill(zBuffer.begin(), zBuffer.end(), std::numeric_limits<double>::max());
         // Llamada a la función render con la matriz de vértices transformados
         render(vertexArray, uniform);
 
