@@ -47,33 +47,227 @@ Color fragmentShaderSun(Fragment& fragment) {
     // Obtiene las coordenadas del fragmento en el espacio 2D
     glm::vec2 fragmentCoords(fragment.original.x, fragment.original.y);
 
+    // Crear un objeto FastNoiseLite para generar ruido
     FastNoiseLite noise;
-    noise.SetNoiseType(FastNoiseLite:: NoiseType_Cellular);
-    noise.SetSeed(123);
-    noise.SetFrequency(0.1f);
-    noise.SetFractalType(FastNoiseLite:: FractalType_PingPong);
-    noise.SetFractalOctaves(4);
-    noise.SetFractalLacunarity(2 + nextTime);
-    noise.SetFractalGain(0.90f);
-    noise.SetFractalWeightedStrength(0.70f);
-    noise.SetFractalPingPongStrength(3 );
-    noise.SetCellularDistanceFunction(FastNoiseLite:: CellularDistanceFunction_Euclidean);
-    noise.SetCellularReturnType(FastNoiseLite:: CellularReturnType_Distance2Add);
-    noise.SetCellularJitter(1);
+
+    // Configuración del ruido
+    noise.SetNoiseType(FastNoiseLite::NoiseType_Cellular); // Tipo de ruido celular
+    noise.SetSeed(1500); // Semilla para la generación de ruido (puedes cambiarla)
+    noise.SetFrequency(0.005f); // Frecuencia del ruido (ajusta según tus preferencias)
+
+    // Configuración de ruido fractal para variaciones
+    noise.SetFractalType(FastNoiseLite::FractalType_PingPong); // Tipo de ruido fractal
+    noise.SetFractalOctaves(2); // Número de octavas
+    noise.SetFractalLacunarity(10 + nextTime); // Lacunarity (variación en la frecuencia)
+    noise.SetFractalGain(1.0f); // Ganancia
+    noise.SetFractalWeightedStrength(0.80f); // Fuerza ponderada
+    noise.SetFractalPingPongStrength(10); // Fuerza de ping pong
+
+    // Configuración de ruido celular
+    noise.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_Euclidean); // Función de distancia celular
+    noise.SetCellularReturnType(FastNoiseLite::CellularReturnType_Distance2Add); // Tipo de retorno celular
+    noise.SetCellularJitter(20); // Jitter (variación en las celdas)
 
     // Definir el rango de colores desde amarillo hasta rojo
     Color yellowColor(255, 255, 0, 255);
-    Color redColor(255, 0, 0, 255);
+    Color redColor(255, 75, 0, 255);
+    Color flareColor(255, 0, 0, 255); // Color de las llamaradas (ajusta según tus preferencias)
 
+    // Parámetros para la rotación del sol
+    float ox = 3000.0f; // Desplazamiento en X
+    float oy = 3000.0f; // Desplazamiento en Y
+    float zoom = 5000.0f; // Factor de zoom (ajusta según tus preferencias)
 
-    float ox = 3000.0f;
-    float oy = 3000.0f;
-    float zoom = 5000.0f;
-
+    // Obtener el valor de ruido en función de la posición y el zoom
     float noiseValue = abs(noise.GetNoise((fragment.original.x + ox) * zoom, (fragment.original.y + oy) * zoom, fragment.original.z * zoom));
 
-    Color tmpColor = (noiseValue < 0.1f) ? yellowColor : redColor;
+    // Aplicar un color amarillo si el valor de ruido es bajo, de lo contrario, aplicar rojo
+    Color tmpColor = (noiseValue < 0.5f) ? redColor : yellowColor;
 
+    // Agregar efecto de llamaradas de fuego
+    float flareIntensity = 2.0f;
+    float oxf = 6000.0f; // Desplazamiento en X
+    float oyf = 6000.0f; // Desplazamiento en Y
+    float zoomf = 8000.0f; // Factor de zoom (ajusta según tus preferencias)
+
+    float noiseValuef = abs(noise.GetNoise((fragment.original.x + oxf) * zoomf, (fragment.original.y + oyf) * zoomf, fragment.original.z * zoomf));
+
+    if (noiseValuef > 0.9f) {
+      /*  tmpColor = flareColor; */
+    }
+
+    // Multiplicar el color por la coordenada Z para simular la perspectiva
     fragment.color = tmpColor * fragment.z;
+    fragment.color = fragment.color + (flareColor * flareIntensity);
+
+    // Incrementar la variable "nextTime" para animar el ruido (rotación)
+    nextTime += 0.5f; // Puedes ajustar la velocidad de rotación
+
+    return fragment.color;
+}
+
+Color fragmentShaderEarth(Fragment& fragment) {
+    // Obtiene las coordenadas del fragmento en el espacio 2D
+    glm::vec2 fragmentCoords(fragment.original.x, fragment.original.y);
+
+    // Aplicar un ruido para simular las características de la superficie terrestre
+    FastNoiseLite noise;
+    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noise.SetSeed(12000);
+    noise.SetFrequency(0.0002f);
+    noise.SetFractalType(FastNoiseLite::FractalType_Ridged);
+    noise.SetFractalOctaves(3);
+    noise.SetFractalLacunarity(10.0f + nextTime);
+    noise.SetFractalGain(0.2f);
+    noise.SetFractalWeightedStrength(0.50f); // Fuerza ponderada
+    noise.SetFractalPingPongStrength(10); // Fuerza de ping pong
+
+    // Configuración de ruido celular
+    noise.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_Euclidean); // Función de distancia celular
+    noise.SetCellularReturnType(FastNoiseLite::CellularReturnType_Distance2Add); // Tipo de retorno celular
+    noise.SetCellularJitter(6); // Jitter (variación en las celdas)
+
+    // Definir colores para el agua y la tierra
+    Color waterColor(0, 0, 255, 255); // Color del agua
+    Color landColor(0, 128, 0, 255);  // Color de la tierra
+    Color cloudColor(233, 239, 240, 200);  // Color de las nubes
+
+    // Parámetros para la rotación del sol
+    float ox = 3000.0f; // Desplazamiento en X
+    float oy = 3000.0f; // Desplazamiento en Y
+    float zoom = 5000.0f; // Factor de zoom (ajusta según tus preferencias)
+
+    // Obtener el valor de ruido en función de la posición y el zoom
+    float noiseValue = abs(noise.GetNoise((fragment.original.x + ox) * zoom, (fragment.original.y + oy) * zoom, fragment.original.z * zoom));
+
+    // Seleccionar el color en función del valor de ruido y el umbral
+    Color tmpColor = (noiseValue < 0.3f) ? waterColor : landColor;
+
+    float oxc = 5000.0f; // Desplazamiento en X
+    float oyc = 5000.0f; // Desplazamiento en Y
+    float zoomc = 8000.0f; // Factor de zoom (ajusta según tus preferencias)
+
+    float noiseValueC = abs(noise.GetNoise((fragment.original.x + oxc) * zoomc, (fragment.original.y + oyc) * zoomc, fragment.original.z * zoomc));
+
+    if (noiseValueC > 0.5f) {
+        tmpColor = cloudColor;
+    }
+
+    // Multiplicar el color por la coordenada Z para simular la perspectiva
+    fragment.color = tmpColor * fragment.z;
+
+    // Incrementar la variable "nextTime" para animar el ruido (rotación)
+    nextTime += 0.5f; // Puedes ajustar la velocidad de rotación
+
+    return fragment.color;
+}
+
+Color fragmentShaderJupiter(Fragment& fragment) {
+    // Obtener las coordenadas del fragmento en el espacio 2D
+    glm::vec2 fragmentCoords(fragment.original.x, fragment.original.y);
+
+    // Parámetros para el ruido y la rotación
+    float ox = 3000.0f; // Desplazamiento en X
+    float oy = 3000.0f; // Desplazamiento en Y
+    float zoom = 5000.0f; // Factor de zoom (ajusta según tus preferencias)
+
+    // Obtener el valor de ruido en función de la posición y el zoom
+    FastNoiseLite noise;
+    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noise.SetSeed(1384);
+    noise.SetFrequency(0.005f);
+    noise.SetFractalType(FastNoiseLite::FractalType_Ridged);
+    noise.SetFractalOctaves(3);
+    noise.SetFractalLacunarity(5.0f + nextTime);
+    noise.SetFractalGain(0.9f);
+    noise.SetFractalWeightedStrength(0.90f); // Fuerza ponderada
+    noise.SetFractalPingPongStrength(1); // Fuerza de ping pong
+
+    // Configuración de ruido celular
+    noise.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_Euclidean); // Función de distancia celular
+    noise.SetCellularReturnType(FastNoiseLite::CellularReturnType_Distance2Add); // Tipo de retorno celular
+    noise.SetCellularJitter(10); // Jitter (variación en las celdas)
+
+    // Definir colores para Júpiter y la Gran Mancha Roja
+    Color jupiterColor(255, 164, 81, 255); // Color de Júpiter
+    Color redSpotColor(240, 138, 65, 255);  // Color de la Gran Mancha Roja
+
+    // Obtener el valor de ruido en función de la posición y el zoom
+    float noiseValue = abs(noise.GetNoise((fragment.original.x + ox) * zoom, (fragment.original.y + oy) * zoom, fragment.original.z * zoom));
+
+    // Mapear el valor de ruido al rango de colores para Júpiter
+    float tmp = (noiseValue + 1.0f) / 2.0f; // Asegura que esté en el rango [0, 1]
+    Color jupiterColorFinal = jupiterColor * tmp;
+
+    // Parámetros para la ubicación y el tamaño de la Gran Mancha Roja
+    glm::vec2 redSpotCenter(0.2f, -0.15f);
+    float redSpotRadius = 0.025f;
+
+    // Calcular la distancia desde el centro para simular la Gran Mancha Roja
+    float distanceToCenter = glm::length(fragmentCoords - redSpotCenter);
+
+    // Verificar si el fragmento está dentro de la Gran Mancha Roja y asignar su color
+    if (distanceToCenter <= redSpotRadius) {
+        fragment.color = redSpotColor;
+    } else {
+        fragment.color = jupiterColorFinal;
+    }
+
+    // Incrementar la variable "nextTime" para animar el ruido (rotación)
+    nextTime += 0.2f; // Puedes ajustar la velocidad de rotación
+
+    return fragment.color;
+}
+
+
+Color fragmentShaderSaturn(Fragment& fragment) {
+    // Obtiene las coordenadas del fragmento en el espacio 2D
+    glm::vec2 fragmentCoords(fragment.original.x, fragment.original.y);
+
+    // Obtener el valor de ruido en función de la posición y el zoom
+    FastNoiseLite noise;
+    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noise.SetSeed(1000);
+    noise.SetFrequency(0.005f);
+    noise.SetFractalType(FastNoiseLite::FractalType_Ridged);
+    noise.SetFractalOctaves(1);
+    noise.SetFractalLacunarity(5.0f + nextTime);
+    noise.SetFractalGain(0.5f);
+    noise.SetFractalWeightedStrength(0.90f); // Fuerza ponderada
+    noise.SetFractalPingPongStrength(2); // Fuerza de ping pong
+
+    // Configuración de ruido celular
+    noise.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_Euclidean); // Función de distancia celular
+    noise.SetCellularReturnType(FastNoiseLite::CellularReturnType_Distance2Add); // Tipo de retorno celular
+    noise.SetCellularJitter(5); // Jitter (variación en las celdas)
+
+    // Definir colores para el planeta Saturno y los anillos
+    Color saturnColor1(206, 184, 184, 255); // Color del planeta Saturno
+    Color saturnColor2(234,214,184, 255); // Color del planeta Saturno
+    Color ringColor(255, 255, 255, 255);   // Color de los anillos de Saturno
+
+    // Parámetros para el ruido y la rotación
+    float ox = 3000.0f; // Desplazamiento en X
+    float oy = 3000.0f; // Desplazamiento en Y
+    float zoom = 5000.0f; // Factor de zoom (ajusta según tus preferencias)
+
+    // Obtener el valor de ruido en función de la posición y el zoom
+    float noiseValue = abs(noise.GetNoise((fragment.original.x + ox) * zoom, (fragment.original.y + oy) * zoom, fragment.original.z * zoom));
+
+    // Mapear el valor de ruido al rango de colores
+    float tmp = (noiseValue + 1.0f) / 2.0f; // Asegura que esté en el rango [0, 1]
+
+    // Mezcla los colores del vórtice basados en el valor de ruido
+    Color saturnColor = saturnColor2 * (1.0f - tmp) + saturnColor1 * tmp;
+
+    fragment.color = saturnColor;
+
+    // Parámetros para los anillos
+    float ringInnerRadius = 0.6f;
+    float ringOuterRadius = 0.8f;
+
+    // Incrementar la variable "nextTime" para animar el ruido (rotación)
+    nextTime += 0.5f; // Puedes ajustar la velocidad de rotación
+
     return fragment.color;
 }

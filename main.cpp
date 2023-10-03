@@ -158,9 +158,9 @@ glm::mat4 createProjectionMatrix() {
 glm::mat4 createViewportMatrix() {
     glm::mat4 viewport = glm::mat4(1.0f);
     // Scale
-    viewport = glm::scale(viewport, glm::vec3(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f, 0.5f));
+    viewport = glm::scale(viewport, glm::vec3(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 1.5f, 0.5f));
     // Translate
-    viewport = glm::translate(viewport, glm::vec3(1.0f, 1.0f, 1.0f));
+    viewport = glm::translate(viewport, glm::vec3(1.0f, 0.75f, 1.0f));
 
     return viewport;
 }
@@ -220,7 +220,7 @@ void render(const std::vector<Vertex>& vertexArray,  const Uniform& uniform) {
                         int index = y * WINDOW_WIDTH + x;
                         if (depth < zBuffer[index]) {
                             // Apply fragment shader to calculate final color
-                            Color fragmentShaderf = fragmentShaderSun(fragment);
+                            Color fragmentShaderf = fragmentShaderEarth(fragment); //Cambiar nombre del método para ver los shaders
                             // Draw the fragment using SDL_SetRenderDrawColor and SDL_RenderDrawPoint
                             SDL_SetRenderDrawColor(renderer, fragmentShaderf.r, fragmentShaderf.g, fragmentShaderf.b, fragmentShaderf.a);
                             SDL_RenderDrawPoint(renderer, x, WINDOW_HEIGHT-y);
