@@ -310,6 +310,58 @@ Color fragmentShaderUranus(Fragment& fragment) {
 }
 
 Color fragmentShaderNeptune(Fragment& fragment) {
+    // Obtiene las coordenadas del fragmento en el espacio 2D
+    glm::vec2 fragmentCoords(fragment.original.x, fragment.original.y);
+
+    // Aplicar un ruido para simular las características de la superficie terrestre
+    FastNoiseLite noise;
+    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noise.SetSeed(23838);
+    noise.SetFrequency(0.0023f);
+    noise.SetFractalType(FastNoiseLite::FractalType_Ridged);
+    noise.SetFractalOctaves(1);
+    noise.SetFractalLacunarity(2.0f + nextTime);
+    noise.SetFractalGain(0.5f);
+    noise.SetFractalWeightedStrength(0.80f); // Fuerza ponderada
+    noise.SetFractalPingPongStrength(4); // Fuerza de ping pong
+
+    // Configuración de ruido celular
+    noise.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_Euclidean); // Función de distancia celular
+    noise.SetCellularReturnType(FastNoiseLite::CellularReturnType_Distance2Add); // Tipo de retorno celular
+    noise.SetCellularJitter(2); // Jitter (variación en las celdas)
+
+    // Definir colores
+    Color neptuneColor1(63,84,186, 255); // Color de Neptuno principal
+    Color neptuneColor2(91,93,223, 255);
+    Color cloudColor(233, 239, 240, 200);  // Color de las nubes
+
+    // Parámetros para la rotación del sol
+    float ox = 1000.0f; // Desplazamiento en X
+    float oy = 1000.0f; // Desplazamiento en Y
+    float zoom = 3000.0f; // Factor de zoom (ajusta según tus preferencias)
+
+    // Obtener el valor de ruido en función de la posición y el zoom
+    float noiseValue = abs(noise.GetNoise((fragment.original.x + ox) * zoom, (fragment.original.y + oy) * zoom, fragment.original.z * zoom));
+
+    // Seleccionar el color en función del valor de ruido y el umbral
+    Color tmpColor = (noiseValue < 0.9f) ? neptuneColor1 : neptuneColor2;
+
+    float oxc = 4000.0f; // Desplazamiento en X
+    float oyc = 4000.0f; // Desplazamiento en Y
+    float zoomc = 6000.0f; // Factor de zoom (ajusta según tus preferencias)
+
+    float noiseValueC = abs(noise.GetNoise((fragment.original.x + oxc) * zoomc, (fragment.original.y + oyc) * zoomc, fragment.original.z * zoomc));
+
+    if (noiseValueC < 0.008f) {
+        tmpColor = cloudColor;
+    }
+
+    // Multiplicar el color por la coordenada Z para simular la perspectiva
+    fragment.color = tmpColor * fragment.z;
+
+    // Incrementar la variable "nextTime" para animar el ruido (rotación)
+    nextTime += 0.5f; // Puedes ajustar la velocidad de rotación
+
     return fragment.color;
 }
 
