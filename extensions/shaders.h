@@ -193,6 +193,47 @@ Color fragmentShaderEarth(Fragment& fragment) {
 }
 
 Color fragmentShaderMars(Fragment& fragment) {
+    // Obtiene las coordenadas del fragmento en el espacio 2D
+    glm::vec2 fragmentCoords(fragment.original.x, fragment.original.y);
+
+    // Aplicar un ruido para simular las características de la superficie terrestre
+    FastNoiseLite noise;
+    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noise.SetSeed(2050);
+    noise.SetFrequency(0.006f);
+    noise.SetFractalType(FastNoiseLite::FractalType_Ridged);
+    noise.SetFractalOctaves(2);
+    noise.SetFractalLacunarity(4.0f + nextTime);
+    noise.SetFractalGain(0.8f);
+    noise.SetFractalWeightedStrength(0.80f); // Fuerza ponderada
+    noise.SetFractalPingPongStrength(8); // Fuerza de ping pong
+
+    // Configuración de ruido celular
+    noise.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_Euclidean); // Función de distancia celular
+    noise.SetCellularReturnType(FastNoiseLite::CellularReturnType_Distance2Add); // Tipo de retorno celular
+    noise.SetCellularJitter(6); // Jitter (variación en las celdas)
+
+    // Definir colores
+    Color marsColor1(184, 73, 46, 255); // Color de Neptuno principal
+    Color marsColor2(138, 77, 62, 255);
+
+    // Parámetros para la rotación del sol
+    float ox = 3000.0f; // Desplazamiento en X
+    float oy = 3000.0f; // Desplazamiento en Y
+    float zoom = 5000.0f; // Factor de zoom (ajusta según tus preferencias)
+
+    // Obtener el valor de ruido en función de la posición y el zoom
+    float noiseValue = abs(noise.GetNoise((fragment.original.x + ox) * zoom, (fragment.original.y + oy) * zoom, fragment.original.z * zoom));
+
+    // Seleccionar el color en función del valor de ruido y el umbral
+    Color tmpColor = (noiseValue < 0.4f) ? marsColor1 : marsColor2;
+
+    // Multiplicar el color por la coordenada Z para simular la perspectiva
+    fragment.color = tmpColor * fragment.z;
+
+    // Incrementar la variable "nextTime" para animar el ruido (rotación)
+    nextTime += 0.5f; // Puedes ajustar la velocidad de rotación
+
     return fragment.color;
 }
 
@@ -306,6 +347,47 @@ Color fragmentShaderSaturn(Fragment& fragment) {
 }
 
 Color fragmentShaderUranus(Fragment& fragment) {
+    // Obtiene las coordenadas del fragmento en el espacio 2D
+    glm::vec2 fragmentCoords(fragment.original.x, fragment.original.y);
+
+    // Aplicar un ruido para simular las características de la superficie terrestre
+    FastNoiseLite noise;
+    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noise.SetSeed(2000);
+    noise.SetFrequency(0.009f);
+    noise.SetFractalType(FastNoiseLite::FractalType_Ridged);
+    noise.SetFractalOctaves(2);
+    noise.SetFractalLacunarity(2.0f + nextTime);
+    noise.SetFractalGain(0.5f);
+    noise.SetFractalWeightedStrength(0.80f); // Fuerza ponderada
+    noise.SetFractalPingPongStrength(4); // Fuerza de ping pong
+
+    // Configuración de ruido celular
+    noise.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_Euclidean); // Función de distancia celular
+    noise.SetCellularReturnType(FastNoiseLite::CellularReturnType_Distance2Add); // Tipo de retorno celular
+    noise.SetCellularJitter(2); // Jitter (variación en las celdas)
+
+    // Definir colores
+    Color uranusColor1(218, 242, 242, 255); // Color de Neptuno principal
+    Color uranusColor2(209,231,231, 255);
+
+    // Parámetros para la rotación del sol
+    float ox = 1000.0f; // Desplazamiento en X
+    float oy = 1000.0f; // Desplazamiento en Y
+    float zoom = 3000.0f; // Factor de zoom (ajusta según tus preferencias)
+
+    // Obtener el valor de ruido en función de la posición y el zoom
+    float noiseValue = abs(noise.GetNoise((fragment.original.x + ox) * zoom, (fragment.original.y + oy) * zoom, fragment.original.z * zoom));
+
+    // Seleccionar el color en función del valor de ruido y el umbral
+    Color tmpColor = (noiseValue < 0.9f) ? uranusColor1 : uranusColor2;
+
+    // Multiplicar el color por la coordenada Z para simular la perspectiva
+    fragment.color = tmpColor * fragment.z;
+
+    // Incrementar la variable "nextTime" para animar el ruido (rotación)
+    nextTime += 0.5f; // Puedes ajustar la velocidad de rotación
+
     return fragment.color;
 }
 
@@ -333,7 +415,7 @@ Color fragmentShaderNeptune(Fragment& fragment) {
     // Definir colores
     Color neptuneColor1(63,84,186, 255); // Color de Neptuno principal
     Color neptuneColor2(91,93,223, 255);
-    Color cloudColor(233, 239, 240, 200);  // Color de las nubes
+    Color cloudColor(255, 255, 255, 255);  // Color de las nubes
 
     // Parámetros para la rotación del sol
     float ox = 1000.0f; // Desplazamiento en X
