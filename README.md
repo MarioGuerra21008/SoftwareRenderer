@@ -16,7 +16,12 @@ Ahora, aquí se pueden observar los cambios realizados con la nave y el cubo.
 
 Se realizaron shaders para los planetas y estrellas a usar en el proyecto.
 
-Se cuentan con los siguientes shaders:
+Para ver cada shader hay que ir a la línea 223 del main.cpp y cambiar el nombre del método dependiendo del planeta que se desea ver, los métodos están en shaders.h
+
+![image](https://github.com/MarioGuerra21008/SoftwareRenderer/assets/88167635/bef40464-256a-4b01-8de6-54af6938afab)
+
+
+Se cuenta con los siguientes shaders:
 
 ## Sol
 
