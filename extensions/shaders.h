@@ -106,6 +106,14 @@ Color fragmentShaderSun(Fragment& fragment) {
     return fragment.color;
 }
 
+Color fragmentShaderMercury(Fragment& fragment) {
+    return fragment.color;
+}
+
+Color fragmentShaderVenus(Fragment& fragment) {
+    return fragment.color;
+}
+
 Color fragmentShaderEarth(Fragment& fragment) {
     // Obtiene las coordenadas del fragmento en el espacio 2D
     glm::vec2 fragmentCoords(fragment.original.x, fragment.original.y);
@@ -131,6 +139,7 @@ Color fragmentShaderEarth(Fragment& fragment) {
     Color waterColor(0, 0, 255, 255); // Color del agua
     Color landColor(0, 128, 0, 255);  // Color de la tierra
     Color cloudColor(233, 239, 240, 200);  // Color de las nubes
+    Color polarColor(255, 255, 255, 255); //Color de los polos
 
     // Parámetros para la rotación del sol
     float ox = 3000.0f; // Desplazamiento en X
@@ -156,9 +165,34 @@ Color fragmentShaderEarth(Fragment& fragment) {
     // Multiplicar el color por la coordenada Z para simular la perspectiva
     fragment.color = tmpColor * fragment.z;
 
+    // Parámetros para la ubicación y el tamaño de la Gran Mancha Roja
+    glm::vec2 northPoleCenter(0.0f, 0.7f);
+    glm::vec2 southPoleCenter(0.0f, -0.7f);
+    float poleRadius = 0.33f;
+
+    // Calcular la distancia desde el centro para simular la Gran Mancha Roja
+    float distanceToCenterN = glm::length(fragmentCoords - northPoleCenter);
+    float distanceToCenterS = glm::length(fragmentCoords - southPoleCenter);
+
+    // Verificar si el fragmento está dentro y asignar su color
+    if (distanceToCenterN <= poleRadius) {
+        fragment.color = polarColor;
+    } else {
+        fragment.color = fragment.color;
+    }
+    if (distanceToCenterS <= poleRadius) {
+        fragment.color = polarColor;
+    } else {
+        fragment.color = fragment.color;
+    }
+
     // Incrementar la variable "nextTime" para animar el ruido (rotación)
     nextTime += 0.5f; // Puedes ajustar la velocidad de rotación
 
+    return fragment.color;
+}
+
+Color fragmentShaderMars(Fragment& fragment) {
     return fragment.color;
 }
 
@@ -219,7 +253,6 @@ Color fragmentShaderJupiter(Fragment& fragment) {
     return fragment.color;
 }
 
-
 Color fragmentShaderSaturn(Fragment& fragment) {
     // Obtiene las coordenadas del fragmento en el espacio 2D
     glm::vec2 fragmentCoords(fragment.original.x, fragment.original.y);
@@ -269,5 +302,17 @@ Color fragmentShaderSaturn(Fragment& fragment) {
     // Incrementar la variable "nextTime" para animar el ruido (rotación)
     nextTime += 0.5f; // Puedes ajustar la velocidad de rotación
 
+    return fragment.color;
+}
+
+Color fragmentShaderUranus(Fragment& fragment) {
+    return fragment.color;
+}
+
+Color fragmentShaderNeptune(Fragment& fragment) {
+    return fragment.color;
+}
+
+Color fragmentShaderMoon(Fragment& fragment) {
     return fragment.color;
 }
