@@ -145,7 +145,7 @@ glm::mat4 createViewMatrix() {
             glm::vec3(0, 1, 0)
     );
 }
-
+//comentario de prueba
 glm::mat4 createProjectionMatrix() {
     float fovInDegrees = 45.0f;
     float aspectRatio = SCREEN_WIDTH / SCREEN_HEIGHT;
